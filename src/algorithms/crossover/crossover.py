@@ -5,7 +5,7 @@ from typing import Tuple
 
 
 # TODO: Poprawić krosowanie aby działało na genach nie chromosomach
-# TODO: Kamil poprawić swoje funkcje
+# TODO: Sprawdzić ile jest zwracanych child (Center of mass, blend, average)
 # TODO: Julian wrzucić swoją funkcję krzyżującą
 
 
@@ -108,9 +108,9 @@ class Crossover:
 
         self.children.append(child1)
 
-    # used for center of mass crossover
-    def blx_crossover(self, specimen1, specimen2):
-        child = []
+    def blend_crossover_alpha(self, specimen1, specimen2):
+        child1_chromosomes = []
+        child2_chromosomes = []
 
         for i in range(len(specimen1)):
             min_val = min(specimen1[i], specimen2[i])
@@ -118,52 +118,78 @@ class Crossover:
             range_val = max_val - min_val
             lower_bound = min_val - 0.2 * range_val
             upper_bound = max_val + 0.2 * range_val
-            child.append(random.uniform(lower_bound, upper_bound))
 
-        return child
+            child1_chromosomes.append(random.uniform(lower_bound, upper_bound))
+            child2_chromosomes.append(random.uniform(lower_bound, upper_bound))
+
+        child1 = Specimen.from_chromosomes(child1_chromosomes, specimen1.boundaries, specimen1.accuracy,
+                                          specimen1.fitness_function)
+        child2 = Specimen.from_chromosomes(child2_chromosomes, specimen1.boundaries, specimen1.accuracy,
+                                          specimen1.fitness_function)
+        self.children.append(child1)
+        self.children.append(child2)
+
+    def blend_crossover_beta(self, specimen1, specimen2):
+        child1_chromosomes = []
+        child2_chromosomes = []
+
+        for i in range(len(specimen1)):
+            min_val = min(specimen1[i], specimen2[i])
+            max_val = max(specimen1[i], specimen2[i])
+            range_val = max_val - min_val
+            lower_bound = min_val - 0.2 * range_val
+            upper_bound = max_val + 0.3 * range_val
+
+            child1_chromosomes.append(random.uniform(lower_bound, upper_bound))
+            child2_chromosomes.append(random.uniform(lower_bound, upper_bound))
+
+        child1 = Specimen.from_chromosomes(child1_chromosomes, specimen1.boundaries, specimen1.accuracy,
+                                           specimen1.fitness_function)
+        child2 = Specimen.from_chromosomes(child2_chromosomes, specimen1.boundaries, specimen1.accuracy,
+                                           specimen1.fitness_function)
+        self.children.append(child1)
+        self.children.append(child2)
 
     def center_of_mass_crossover(self, specimen1, specimen2):
         center_of_mass = (np.sum(specimen1) + np.sum(specimen2)) / 2
 
         for parent in (specimen1, specimen2):
             temporary_vector = 2 * center_of_mass - parent
-            child = self.blx_crossover(temporary_vector, parent)
+            self.blend_crossover_alpha(temporary_vector, parent)
 
-            self.children.append(Specimen.from_chromosomes(child, specimen1.boundaries, specimen1.accuracy,
-                                                           specimen1.fitness_function))
+    def imperfect_crossover(self, specimen1, specimen2, add_probability: float = 0.3, delete_probability: float = 0.6):
 
-    def imperfect_crossover(
-            self,
-            parent1: np.ndarray,
-            parent2: np.ndarray,
-            add_probability: float = 0.3,
-            delete_probability: float = 0.6) -> Tuple[np.ndarray, np.ndarray]:
-
-        size_x = len(parent1)
-        size_y = len(parent2)
+        size_x = len(specimen1)
+        size_y = len(specimen2)
         size = min(size_x, size_y)
         point = random.randint(1, size)
-        child1, child2 = np.zeros(size_x), np.zeros(size_y)
+        child1_chromosomes, child2_chromosomes = np.zeros(size_x), np.zeros(size_y)
 
         if random.random() < add_probability:
-            child1[:point - 1] = parent1[:point - 1]
-            child1[point] = np.random.uniform(min(parent1), max(parent1))
-            child1[point + 1:] = parent2[point + 1:size_y]
+            child1_chromosomes[:point - 1] = specimen1[:point - 1]
+            child1_chromosomes[point] = np.random.uniform(min(specimen1), max(specimen1))
+            child1_chromosomes[point + 1:] = specimen2[point + 1:size_y]
 
-            child2[:point - 1] = parent2[:point - 1]
-            child2[point] = np.random.uniform(min(parent2), max(parent2))
-            child2[point + 1:] = parent1[point + 1:size_x]
+            child2_chromosomes[:point - 1] = specimen2[:point - 1]
+            child2_chromosomes[point] = np.random.uniform(min(specimen2), max(specimen2))
+            child2_chromosomes[point + 1:] = specimen1[point + 1:size_x]
         elif random.random() < delete_probability:
-            child1[:point - 1] = parent1[:point - 1]
-            child1[point:] = parent2[point:size_y]
+            child1_chromosomes[:point - 1] = specimen1[:point - 1]
+            child1_chromosomes[point:] = specimen2[point:size_y]
 
-            child2[:point - 1] = parent2[:point - 1]
-            child2[point:] = parent1[point:size_x]
+            child2_chromosomes[:point - 1] = specimen2[:point - 1]
+            child2_chromosomes[point:] = specimen1[point:size_x]
         else:
-            child1[:point] = parent1[:point]
-            child1[point:] = parent2[point:]
+            child1_chromosomes[:point] = specimen1[:point]
+            child1_chromosomes[point:] = specimen2[point:]
 
-            child2[:point] = parent2[:point]
-            child2[point:] = parent1[point:]
+            child2_chromosomes[:point] = specimen2[:point]
+            child2_chromosomes[point:] = specimen1[point:]
 
-        return child1, child2
+        child1 = Specimen.from_chromosomes(child1_chromosomes, specimen1.boundaries, specimen1.accuracy,
+                                           specimen1.fitness_function)
+        child2 = Specimen.from_chromosomes(child2_chromosomes, specimen2.boundaries, specimen2.accuracy,
+                                           specimen2.fitness_function)
+
+        self.children.append(child1)
+        self.children.append(child2)
