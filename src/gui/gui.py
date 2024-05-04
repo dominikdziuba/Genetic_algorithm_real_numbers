@@ -5,8 +5,9 @@ import re
 
 import numpy as np
 
-from main import main_function
-from src.configuration.config import Config
+#from  import main_function
+#from ..configuration.config import Config
+# from src.configuration.config import Config
 from IPython.terminal.pt_inputhooks import tk
 
 
@@ -19,7 +20,7 @@ class GUIClass(Tk):
         super().__init__()
 
         self.resizable(False, False)
-        self.title("Obliczenia ewolucyjne - Projekt 2")
+        self.title("Obliczenia ewolucyjne - Projekt 4")
 
         self.create_widgets()
 
@@ -107,14 +108,14 @@ class GUIClass(Tk):
         ttk.Label(mainframe, text="Crossover method:").grid(column=0, row=12, sticky=W)
         self.crossover_method = StringVar()
         self.crossover_prob_combo = ttk.Combobox(mainframe, textvariable=self.crossover_method)
-        self.crossover_prob_combo['values'] = ("Single Point Crossover", "Two Point Crossover", "Three Point Crossover", "Uniform Crossover", "Discrete Crossover",
-                                               "Self Crossover", "Binary Crossover", "Linkage Evolution Crossover", "Elite Crossover")
+        self.crossover_prob_combo['values'] = ("Arithmetic", "Linear", "Average", "Blend (Alpha)",
+                                               "Blend (Alpha & Beta)", "Center of Mass", "Imperfect", "Linear 3")
         self.crossover_prob_combo.grid(column=1, row=12, sticky="N W", padx=5, pady=5)
 
         ttk.Label(mainframe, text="Mutation method:").grid(column=0, row=13, sticky=W)
         self.mutation_method = StringVar()
         self.mutation_method_combo = ttk.Combobox(mainframe, textvariable=self.mutation_method)
-        self.mutation_method_combo['values'] = ("Boundary Mutation", "One Point Mutation", "Two Point Mutation")
+        self.mutation_method_combo['values'] = ("Even", "Gauss")
         self.mutation_method_combo.grid(column=1, row=13, sticky="N W", padx=5, pady=5)
 
         self.use_elite_strategy_var = BooleanVar()
@@ -172,7 +173,7 @@ class GUIClass(Tk):
 
         exec_time, x, fitness = main_function()
         x = np.round(x, 2)
-        self.info_box = tkinter.messagebox.showinfo(title='Obliczenia ewolucyjne - Projekt 2',
+        self.info_box = tkinter.messagebox.showinfo(title='Obliczenia ewolucyjne - Projekt 4',
                                                     message=f'Execution time: {round(exec_time, 4)}s\nF({x}) = {fitness}')
 
 

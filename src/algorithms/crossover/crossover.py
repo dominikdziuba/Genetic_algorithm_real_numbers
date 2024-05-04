@@ -204,7 +204,7 @@ class Crossover:
         self.children.append(child1)
         self.children.append(child2)
 
-    def generate_children(self, specimen1, specimen2, alpha=random.random()):
+    def linear3_crossover(self, specimen1, specimen2, alpha=random.random()):
 
         if alpha >= 0.5:
             beta = (2 * alpha) ** (1 / (0.5 + 1))
