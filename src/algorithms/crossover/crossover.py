@@ -17,9 +17,9 @@ class Crossover:
         child1_chromosomes = []
         child2_chromosomes = []
 
-        for i in range(len(specimen1)):
-            chromosome1 = specimen1[i]
-            chromosome2 = specimen2[i]
+        for i in range(specimen1.get_number_of_chromosomes()):
+            chromosome1 = specimen1.specimen[i].chromosome
+            chromosome2 = specimen2.specimen[i].chromosome
 
             new_chromosome1 = [0] * len(chromosome1)
             new_chromosome2 = [0] * len(chromosome2)
@@ -43,9 +43,9 @@ class Crossover:
         child2_chromosomes = []
         child3_chromosomes = []
 
-        for i in range(len(specimen1)):
-            chromosome1 = specimen1[i]
-            chromosome2 = specimen2[i]
+        for i in range(specimen1.get_number_of_chromosomes()):
+            chromosome1 = specimen1.specimen[i].chromosome
+            chromosome2 = specimen2.specimen[i].chromosome
 
             new_chromosome1 = [0] * len(chromosome1)
             new_chromosome2 = [0] * len(chromosome2)
@@ -76,9 +76,9 @@ class Crossover:
 
         child1_chromosomes = []
 
-        for i in range(len(specimen1)):
-            chromosome1 = specimen1[i]
-            chromosome2 = specimen2[i]
+        for i in range(specimen1.get_number_of_chromosomes()):
+            chromosome1 = specimen1.specimen[i].chromosome
+            chromosome2 = specimen2.specimen[i].chromosome
 
             new_chromosome = [0] * len(chromosome1)
 
@@ -97,17 +97,17 @@ class Crossover:
         child1_chromosomes = []
         child2_chromosomes = []
 
-        for i in range(len(specimen1)):
-            new_chromosome1 = [0] * len(specimen1[i])
-            new_chromosome2 = [0] * len(specimen1[i])
+        for i in range(specimen1.get_number_of_chromosomes()):
+            new_chromosome1 = [0] * len(specimen1.specimen[i].chromosome)
+            new_chromosome2 = [0] * len(specimen1.specimen[i].chromosome)
 
-            min_val = min(specimen1[i], specimen2[i])
-            max_val = max(specimen1[i], specimen2[i])
+            min_val = np.minimum(specimen1.specimen[i].chromosome, specimen2.specimen[i].chromosome)
+            max_val = np.maximum(specimen1.specimen[i].chromosome, specimen2.specimen[i].chromosome)
             range_val = max_val - min_val
             lower_bound = min_val - 0.2 * range_val
             upper_bound = max_val + 0.2 * range_val
 
-            for j in range(len(specimen1[i])):
+            for j in range(len(specimen1.specimen[i].chromosome)):
                 new_chromosome1[j] = random.uniform(lower_bound, upper_bound)
                 new_chromosome2[j] = random.uniform(lower_bound, upper_bound)
 
@@ -125,17 +125,17 @@ class Crossover:
         child1_chromosomes = []
         child2_chromosomes = []
 
-        for i in range(len(specimen1)):
-            new_chromosome1 = [0] * len(specimen1[i])
-            new_chromosome2 = [0] * len(specimen1[i])
+        for i in range(specimen1.get_number_of_chromosomes()):
+            new_chromosome1 = [0] * len(specimen1.specimen[i].chromosome)
+            new_chromosome2 = [0] * len(specimen1.specimen[i].chromosome)
 
-            min_val = min(specimen1[i], specimen2[i])
-            max_val = max(specimen1[i], specimen2[i])
+            min_val = np.minimum(specimen1.specimen[i].chromosome, specimen2.specimen[i].chromosome)
+            max_val = np.maximum(specimen1.specimen[i].chromosome, specimen2.specimen[i].chromosome)
             range_val = max_val - min_val
             lower_bound = min_val - 0.2 * range_val
             upper_bound = max_val + 0.3 * range_val
 
-            for j in range(len(specimen1[i])):
+            for j in range(len(specimen1.specimen[i].chromosome)):
                 new_chromosome1[j] = random.uniform(lower_bound, upper_bound)
                 new_chromosome2[j] = random.uniform(lower_bound, upper_bound)
 
@@ -152,12 +152,16 @@ class Crossover:
     def center_of_mass_crossover(self, specimen1, specimen2):
         temporary_vector1 = []
         temporary_vector2 = []
+        center_of_mass = 0
 
-        center_of_mass = (np.sum(specimen1) + np.sum(specimen2)) / 2
+        for i in range(specimen1.get_number_of_chromosomes()):
+            center_of_mass += np.sum(specimen1.specimen[i].chromosome) + np.sum(specimen2.specimen[i].chromosome)
 
-        for j in range(len(specimen1)):
-            temporary_vector1[j] = -1 * specimen1[j] + 2 * center_of_mass
-            temporary_vector2[j] = -1 * specimen2[j] + 2 * center_of_mass
+        center_of_mass = center_of_mass / 2
+
+        for j in range(specimen1.get_number_of_chromosomes()):
+            temporary_vector1[j] = -1 * specimen1.specimen[j].chromosome + 2 * center_of_mass
+            temporary_vector2[j] = -1 * specimen2.specimen[j].chromosome + 2 * center_of_mass
 
         child1 = Specimen.from_chromosomes(temporary_vector1, specimen1.boundaries, specimen1.accuracy,
                                            specimen1.fitness_function)
@@ -169,32 +173,37 @@ class Crossover:
 
     def imperfect_crossover(self, specimen1, specimen2, add_probability: float = 0.3, delete_probability: float = 0.6):
 
-        size_x = len(specimen1)
-        size_y = len(specimen2)
+        size_x = specimen1.get_number_of_chromosomes()
+        size_y = specimen2.get_number_of_chromosomes()
+
         size = min(size_x, size_y)
         point = random.randint(1, size)
-        child1_chromosomes, child2_chromosomes = np.zeros(size_x), np.zeros(size_y)
+
+        child1_chromosomes, child2_chromosomes = [None] * size_x, [None] * size_y
+
+        spec1List = [x.get_chromosome() for x in specimen1.specimen]
+        spec2List = [x.get_chromosome() for x in specimen2.specimen]
 
         if random.random() < add_probability:
-            child1_chromosomes[:point - 1] = specimen1[:point - 1]
-            child1_chromosomes[point] = np.random.uniform(min(specimen1), max(specimen1))
-            child1_chromosomes[point + 1:] = specimen2[point + 1:size_y]
+            child1_chromosomes[:point - 1] = specimen1.specimen[:point - 1]
+            child1_chromosomes[point] = np.random.uniform(np.min(spec1List), np.max(spec1List))
+            child1_chromosomes[point + 1:] = specimen2.specimen[point + 1:size_y]
 
-            child2_chromosomes[:point - 1] = specimen2[:point - 1]
-            child2_chromosomes[point] = np.random.uniform(min(specimen2), max(specimen2))
-            child2_chromosomes[point + 1:] = specimen1[point + 1:size_x]
+            child2_chromosomes[:point - 1] = specimen2.specimen[:point - 1]
+            child2_chromosomes[point] = np.random.uniform(np.min(spec2List), np.max(spec2List))
+            child2_chromosomes[point + 1:] = specimen1.specimen[point + 1:size_x]
         elif random.random() < delete_probability:
-            child1_chromosomes[:point - 1] = specimen1[:point - 1]
-            child1_chromosomes[point:] = specimen2[point:size_y]
+            child1_chromosomes[:point - 1] = specimen1.specimen[:point - 1]
+            child1_chromosomes[point:] = specimen2.specimen[point:size_y]
 
-            child2_chromosomes[:point - 1] = specimen2[:point - 1]
-            child2_chromosomes[point:] = specimen1[point:size_x]
+            child2_chromosomes[:point - 1] = specimen2.specimen[:point - 1]
+            child2_chromosomes[point:] = specimen1.specimen[point:size_x]
         else:
-            child1_chromosomes[:point] = specimen1[:point]
+            child1_chromosomes[:point] = specimen1.specimen[:point]
             child1_chromosomes[point:] = specimen2[point:]
 
-            child2_chromosomes[:point] = specimen2[:point]
-            child2_chromosomes[point:] = specimen1[point:]
+            child2_chromosomes[:point] = specimen2.specimen[:point]
+            child2_chromosomes[point:] = specimen1.specimen[point:]
 
         child1 = Specimen.from_chromosomes(child1_chromosomes, specimen1.boundaries, specimen1.accuracy,
                                            specimen1.fitness_function)
@@ -214,14 +223,14 @@ class Crossover:
         child1_chromosomes = []
         child2_chromosomes = []
 
-        for i in range(len(specimen1)):
-            new_chromosome1 = [0] * len(specimen1[i])
-            new_chromosome2 = [0] * len(specimen1[i])
+        for i in range(specimen1.get_number_of_chromosomes()):
+            new_chromosome1 = [0] * len(specimen1.specimen[i].chromosome)
+            new_chromosome2 = [0] * len(specimen1.specimen[i].chromosome)
 
-            chromosome1 = specimen1[i]
-            chromosome2 = specimen2[i]
+            chromosome1 = specimen1.specimen[i].chromosome
+            chromosome2 = specimen2.specimen[i].chromosome
 
-            for j in range(len(specimen1[i])):
+            for j in range(len(specimen1.specimen[i].chromosome)):
                 new_chromosome1[j] = 0.5 * ((1 + beta) * chromosome1[j] + (1 - beta) * chromosome2[j])
                 new_chromosome2[j] = 0.5 * ((1 - beta) * chromosome1[j] + (1 + beta) * chromosome2[j])
 
@@ -235,3 +244,25 @@ class Crossover:
 
         self.children.append(child1)
         self.children.append(child2)
+
+    def cross(self, parent1, parent2):
+        self.children = []
+
+        if self.cross_method == 'arithmetic_crossover':
+            self.arithmetic_crossover(parent1, parent2)
+        elif self.cross_method == 'linear_crossover':
+            self.linear_crossover(parent1, parent2)
+        elif self.cross_method == 'average_crossover':
+            self.average_crossover(parent1, parent2)
+        elif self.cross_method == 'blend_crossover_alpha':
+            self.blend_crossover_alpha(parent1, parent2)
+        elif self.cross_method == 'blend_crossover_beta':
+            self.blend_crossover_beta(parent1, parent2)
+        elif self.cross_method == 'center_of_mass_crossover':
+            self.center_of_mass_crossover(parent1, parent2)
+        elif self.cross_method == 'imperfect_crossover':
+            self.imperfect_crossover(parent1, parent2)
+        elif self.cross_method == 'linear3_crossover':
+            self.linear3_crossover(parent1, parent2)
+
+        return self.children

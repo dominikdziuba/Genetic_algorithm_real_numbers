@@ -5,9 +5,8 @@ import re
 
 import numpy as np
 
-#from  import main_function
-#from ..configuration.config import Config
-# from src.configuration.config import Config
+from main import main_function
+from src.configuration.config import Config
 from IPython.terminal.pt_inputhooks import tk
 
 
@@ -93,12 +92,6 @@ class GUIClass(Tk):
                                              validate="focusout", validatecommand=vcmd, invalidcommand=ivcmd)
         self.mutation_prob_entry.grid(column=1, row=9, sticky="N E", padx=5, pady=5)
 
-        ttk.Label(mainframe, text="Inversion probability:").grid(column=0, row=10, sticky=W)
-        self.inversion_prob = DoubleVar()
-        self.inversion_prob_entry = ttk.Entry(mainframe, width=15, textvariable=self.inversion_prob,
-                                              validate="focusout", validatecommand=vcmd, invalidcommand=ivcmd)
-        self.inversion_prob_entry.grid(column=1, row=10, sticky="N E", padx=5, pady=5)
-
         ttk.Label(mainframe, text="Selection method:").grid(column=0, row=11, sticky=W)
         self.selection_method = StringVar()
         self.selection_method_combo = ttk.Combobox(mainframe, textvariable=self.selection_method)
@@ -108,14 +101,14 @@ class GUIClass(Tk):
         ttk.Label(mainframe, text="Crossover method:").grid(column=0, row=12, sticky=W)
         self.crossover_method = StringVar()
         self.crossover_prob_combo = ttk.Combobox(mainframe, textvariable=self.crossover_method)
-        self.crossover_prob_combo['values'] = ("Arithmetic", "Linear", "Average", "Blend (Alpha)",
-                                               "Blend (Alpha & Beta)", "Center of Mass", "Imperfect", "Linear 3")
+        self.crossover_prob_combo['values'] = ("Arithmetic crossover", "Linear crossover", "Average crossover", "Blend crossover Alpha",
+                                               "Blend crossover beta", "Center of Mass crossover", "Imperfect crossover", "Linear3 crossover")
         self.crossover_prob_combo.grid(column=1, row=12, sticky="N W", padx=5, pady=5)
 
         ttk.Label(mainframe, text="Mutation method:").grid(column=0, row=13, sticky=W)
         self.mutation_method = StringVar()
         self.mutation_method_combo = ttk.Combobox(mainframe, textvariable=self.mutation_method)
-        self.mutation_method_combo['values'] = ("Even", "Gauss")
+        self.mutation_method_combo['values'] = ("Even mutation", "Gauss mutation")
         self.mutation_method_combo.grid(column=1, row=13, sticky="N W", padx=5, pady=5)
 
         self.use_elite_strategy_var = BooleanVar()
@@ -163,7 +156,6 @@ class GUIClass(Tk):
         config.set_param('algorithm_parameters.selection_parameters.tournament_size', self.best_chromosome.get())
         config.set_param('algorithm_parameters.crossover_probability', self.crossover_prob.get())
         config.set_param('algorithm_parameters.mutation_probability', self.mutation_prob.get())
-        config.set_param('algorithm_parameters.inversion_probability', self.inversion_prob.get())
         config.set_param('algorithm_parameters.elite_strategy.use_elite_strategy', self.use_elite_strategy_var.get())
         config.set_param('algorithm_parameters.elite_strategy.elite_count', self.elite_strategy.get())
         config.set_param('algorithm_parameters.crossover_method', self.crossover_method.get().lower().replace(" ", "_"))

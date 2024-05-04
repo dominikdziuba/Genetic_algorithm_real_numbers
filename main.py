@@ -1,15 +1,14 @@
 import random
 
 import numpy as np
-
 from src.algorithms.crossover.crossover import Crossover
-# from src.algorithms.mutation.mutation import Mutation
+from src.algorithms.mutation.mutation import Mutation
 from src.algorithms.selection.selection import GeneticSelection
 from src.configuration.config import Config
 from src.population.population import Population
 from src.algorithms.selection.elite import Elite
 from src.utilities.generating_files import DataSaver
-#from src.gui import gui
+
 
 import time
 
@@ -32,7 +31,6 @@ def main_function():
     crossover_prob = config.get_param('algorithm_parameters.crossover_probability')
     crossover_method = config.get_param('algorithm_parameters.crossover_method')
     mutation_prob = config.get_param('algorithm_parameters.mutation_probability')
-    inversion_prob = config.get_param('algorithm_parameters.inversion_probability')
     mutation_method = config.get_param('algorithm_parameters.mutation_method')
 
 
@@ -61,7 +59,7 @@ def main_function():
     #zapisywanie epoki nr 0 i jej fitness function
 
     for epoch in range(number_of_epochs):
-
+        #print(f'poczatek: {population}')
         selection = GeneticSelection(population=population.get_population(), selection_type=selection_method, tournament_size=selection_count, max=maximum)
         selected_population = selection.get_best_chromosomes()
 
@@ -72,7 +70,7 @@ def main_function():
                 selected_population.remove(elite)
 
         print(f'selected: {selected_population}')
-
+        #print(f'przed: {population}')
         crossover = Crossover(crossover_prob=crossover_prob, cross_method=crossover_method)
         crossed_population = selected_population.copy()
         while len(crossed_population) < population_size - elite_count:
@@ -80,18 +78,17 @@ def main_function():
             child1, child2 = crossover.cross(parent1, parent2)
             crossed_population.append(child1)
             crossed_population.append(child2)
-
+        #print(f'po przed mutacja: {population}')
         for i in range(len(crossed_population)):
             mutation = Mutation(mutation_rate=mutation_prob, mutation_method=mutation_method)
             crossed_population[i] = mutation.mutate(crossed_population[i])
 
-        for i in range(len(crossed_population)):
-            inversion = InversionMutation(inversion_prob=inversion_prob)
-            crossed_population[i] = inversion.inversion_mutation(crossed_population[i])
-
         if use_elite:
             crossed_population.extend(elite_population)
         population.set_population(crossed_population)
+
+        #print(f'po mutacji: {population}')
+
         population.fit()
         if maximum:
             for specimen in population.get_population():
