@@ -101,8 +101,8 @@ class Crossover:
             new_chromosome1 = [0] * len(specimen1.specimen[i].chromosome)
             new_chromosome2 = [0] * len(specimen1.specimen[i].chromosome)
 
-            min_val = np.minimum(specimen1.specimen[i].chromosome, specimen2.specimen[i].chromosome)
-            max_val = np.maximum(specimen1.specimen[i].chromosome, specimen2.specimen[i].chromosome)
+            min_val = np.min(np.minimum(specimen1.specimen[i].chromosome, specimen2.specimen[i].chromosome))
+            max_val = np.max(np.maximum(specimen1.specimen[i].chromosome, specimen2.specimen[i].chromosome))
             range_val = max_val - min_val
             lower_bound = min_val - 0.2 * range_val
             upper_bound = max_val + 0.2 * range_val
@@ -129,8 +129,8 @@ class Crossover:
             new_chromosome1 = [0] * len(specimen1.specimen[i].chromosome)
             new_chromosome2 = [0] * len(specimen1.specimen[i].chromosome)
 
-            min_val = np.minimum(specimen1.specimen[i].chromosome, specimen2.specimen[i].chromosome)
-            max_val = np.maximum(specimen1.specimen[i].chromosome, specimen2.specimen[i].chromosome)
+            min_val = np.min(np.minimum(specimen1.specimen[i].chromosome, specimen2.specimen[i].chromosome))
+            max_val = np.max(np.maximum(specimen1.specimen[i].chromosome, specimen2.specimen[i].chromosome))
             range_val = max_val - min_val
             lower_bound = min_val - 0.2 * range_val
             upper_bound = max_val + 0.3 * range_val
@@ -150,8 +150,8 @@ class Crossover:
         self.children.append(child2)
 
     def center_of_mass_crossover(self, specimen1, specimen2):
-        temporary_vector1 = []
-        temporary_vector2 = []
+        temporary_vector1 = [0] * specimen1.get_number_of_chromosomes()
+        temporary_vector2 = [0] * specimen1.get_number_of_chromosomes()
         center_of_mass = 0
 
         for i in range(specimen1.get_number_of_chromosomes()):
@@ -186,24 +186,30 @@ class Crossover:
 
         if random.random() < add_probability:
             child1_chromosomes[:point - 1] = specimen1.specimen[:point - 1]
-            child1_chromosomes[point] = np.random.uniform(np.min(spec1List), np.max(spec1List))
             child1_chromosomes[point + 1:] = specimen2.specimen[point + 1:size_y]
+            child1_chromosomes[point] = np.random.uniform(np.min(spec1List), np.max(spec1List))
 
             child2_chromosomes[:point - 1] = specimen2.specimen[:point - 1]
-            child2_chromosomes[point] = np.random.uniform(np.min(spec2List), np.max(spec2List))
             child2_chromosomes[point + 1:] = specimen1.specimen[point + 1:size_x]
+            child2_chromosomes[point] = np.random.uniform(np.min(spec2List), np.max(spec2List))
+
+
         elif random.random() < delete_probability:
             child1_chromosomes[:point - 1] = specimen1.specimen[:point - 1]
             child1_chromosomes[point:] = specimen2.specimen[point:size_y]
+            child1_chromosomes[point] = np.zeros(len(spec1List[0]))
 
             child2_chromosomes[:point - 1] = specimen2.specimen[:point - 1]
             child2_chromosomes[point:] = specimen1.specimen[point:size_x]
+            child2_chromosomes[point] = np.zeros(len(spec1List[0]))
         else:
             child1_chromosomes[:point] = specimen1.specimen[:point]
-            child1_chromosomes[point:] = specimen2[point:]
+            child1_chromosomes[point:] = specimen2.specimen[point:]
 
             child2_chromosomes[:point] = specimen2.specimen[:point]
             child2_chromosomes[point:] = specimen1.specimen[point:]
+
+
 
         child1 = Specimen.from_chromosomes(child1_chromosomes, specimen1.boundaries, specimen1.accuracy,
                                            specimen1.fitness_function)

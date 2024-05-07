@@ -92,6 +92,9 @@ def main_function():
         population.fit()
         if maximum:
             for specimen in population.get_population():
+                print(max_fitness)
+                print(1)
+                print(specimen.get_fitness())
                 if max_fitness < specimen.get_fitness():
                     x = specimen.get_decoded_specimen()
                     max_fitness = specimen.get_fitness()
