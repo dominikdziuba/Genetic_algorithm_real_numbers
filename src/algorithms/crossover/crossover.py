@@ -150,8 +150,7 @@ class Crossover:
         self.children.append(child2)
 
     def center_of_mass_crossover(self, specimen1, specimen2):
-        temporary_vector1 = [0] * specimen1.get_number_of_chromosomes()
-        temporary_vector2 = [0] * specimen1.get_number_of_chromosomes()
+        child1_chromosomes = np.zeros(shape=(specimen1.get_number_of_chromosomes(), len(specimen1.specimen[0].chromosome)))
         center_of_mass = 0
 
         for i in range(specimen1.get_number_of_chromosomes()):
@@ -160,55 +159,49 @@ class Crossover:
         center_of_mass = center_of_mass / 2
 
         for j in range(specimen1.get_number_of_chromosomes()):
-            temporary_vector1[j] = -1 * specimen1.specimen[j].chromosome + 2 * center_of_mass
-            temporary_vector2[j] = -1 * specimen2.specimen[j].chromosome + 2 * center_of_mass
+            child1_chromosomes[j] = -1 * specimen1.specimen[j].chromosome + 2 * center_of_mass
 
-        child1 = Specimen.from_chromosomes(temporary_vector1, specimen1.boundaries, specimen1.accuracy,
-                                           specimen1.fitness_function)
-        child2 = Specimen.from_chromosomes(temporary_vector2, specimen1.boundaries, specimen1.accuracy,
+        child1 = Specimen.from_chromosomes(child1_chromosomes, specimen1.boundaries, specimen1.accuracy,
                                            specimen1.fitness_function)
 
         self.blend_crossover_alpha(child1, specimen1)
-        self.blend_crossover_alpha(child2, specimen2)
 
     def imperfect_crossover(self, specimen1, specimen2, add_probability: float = 0.3, delete_probability: float = 0.6):
 
-        size_x = specimen1.get_number_of_chromosomes()
-        size_y = specimen2.get_number_of_chromosomes()
+        child1_chromosomes, child2_chromosomes = [], []
 
-        size = min(size_x, size_y)
-        point = random.randint(1, size)
+        point = random.randint(1, len(specimen1.specimen[0].chromosome) - 1)
 
-        child1_chromosomes, child2_chromosomes = [None] * size_x, [None] * size_y
+        for i in range(specimen1.get_number_of_chromosomes()):
+            new_chromosome1 = [0] * len(specimen1.specimen[i].chromosome)
+            new_chromosome2 = [0] * len(specimen1.specimen[i].chromosome)
 
-        spec1List = [x.get_chromosome() for x in specimen1.specimen]
-        spec2List = [x.get_chromosome() for x in specimen2.specimen]
+            if random.random() < add_probability:
+                new_chromosome1[:point - 1] = specimen1.specimen[i].chromosome[:point - 1]
+                new_chromosome1[point + 1:] = specimen2.specimen[i].chromosome[point + 1:]
+                new_chromosome1[point] = np.random.uniform(np.min(specimen1.specimen[i].chromosome), np.max(specimen1.specimen[i].chromosome))
 
-        if random.random() < add_probability:
-            child1_chromosomes[:point - 1] = specimen1.specimen[:point - 1]
-            child1_chromosomes[point + 1:] = specimen2.specimen[point + 1:size_y]
-            child1_chromosomes[point] = np.random.uniform(np.min(spec1List), np.max(spec1List))
+                new_chromosome2[:point - 1] = specimen2.specimen[i].chromosome[:point - 1]
+                new_chromosome2[point + 1:] = specimen1.specimen[i].chromosome[point + 1:]
+                new_chromosome2[point] = np.random.uniform(np.min(specimen2.specimen[i].chromosome), np.max(specimen2.specimen[i].chromosome))
 
-            child2_chromosomes[:point - 1] = specimen2.specimen[:point - 1]
-            child2_chromosomes[point + 1:] = specimen1.specimen[point + 1:size_x]
-            child2_chromosomes[point] = np.random.uniform(np.min(spec2List), np.max(spec2List))
+            elif random.random() < delete_probability:
+                new_chromosome1[:point - 1] = specimen1.specimen[i].chromosome[:point - 1]
+                new_chromosome1[point:] = specimen2.specimen[i].chromosome[point:]
+                new_chromosome1[point] = 0
 
+                new_chromosome2[:point - 1] = specimen2.specimen[i].chromosome[:point - 1]
+                new_chromosome2[point:] = specimen1.specimen[i].chromosome[point:]
+                new_chromosome2[point] = 0
+            else:
+                new_chromosome1[:point] = specimen1.specimen[i].chromosome[:point]
+                new_chromosome1[point:] = specimen2.specimen[i].chromosome[point:]
 
-        elif random.random() < delete_probability:
-            child1_chromosomes[:point - 1] = specimen1.specimen[:point - 1]
-            child1_chromosomes[point:] = specimen2.specimen[point:size_y]
-            child1_chromosomes[point] = np.zeros(len(spec1List[0]))
+                new_chromosome2[:point] = specimen2.specimen[i].chromosome[:point]
+                new_chromosome2[point:] = specimen1.specimen[i].chromosome[point:]
 
-            child2_chromosomes[:point - 1] = specimen2.specimen[:point - 1]
-            child2_chromosomes[point:] = specimen1.specimen[point:size_x]
-            child2_chromosomes[point] = np.zeros(len(spec1List[0]))
-        else:
-            child1_chromosomes[:point] = specimen1.specimen[:point]
-            child1_chromosomes[point:] = specimen2.specimen[point:]
-
-            child2_chromosomes[:point] = specimen2.specimen[:point]
-            child2_chromosomes[point:] = specimen1.specimen[point:]
-
+            child1_chromosomes.append(new_chromosome1)
+            child2_chromosomes.append(new_chromosome2)
 
 
         child1 = Specimen.from_chromosomes(child1_chromosomes, specimen1.boundaries, specimen1.accuracy,
