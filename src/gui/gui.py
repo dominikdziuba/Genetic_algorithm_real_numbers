@@ -1,7 +1,7 @@
 import tkinter
 from tkinter import *
 from tkinter import ttk,messagebox
-from benchmark_functions as bf
+import benchmark_functions as bf
 from opfunu import cec_based
 import re
 
@@ -174,19 +174,19 @@ class GUIClass(Tk):
         if fit_func == 'Bent Cigar':
             if max_param == 'Minimum':
                 func = cec_based.cec2014.F22014()
-                fit_value = func.minimum()
+                fit_value = 0.0
             else:
                 fit_value = 'Infinite'
         else:
             if max_param == 'Minimum':
-                func = bf.Hypersphere()
+                func = bf.Hypersphere(n_dimensions=self.number_of_variables.get())
                 fit_value = func.minimum()
             else:
                 fit_value = 'Infinite'
 
         self.info_box = tkinter.messagebox.showinfo(title='Obliczenia ewolucyjne - Projekt 4',
                                                     message=f'Execution time: {round(exec_time, 4)}s\nF({x}) = {fitness}\n'
-                                                            f'Real {max_param} of {fit_func} = {}')
+                                                            f'Real {max_param} of {fit_func} = {fit_value}')
 
 
 if __name__ == "__main__":

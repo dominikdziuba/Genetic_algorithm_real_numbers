@@ -2,10 +2,10 @@
     "algorithm_parameters": {
         "start_range_a": -10.0,
         "end_range_b": 10.0,
-        "population_size": 10,
+        "population_size": 8,
         "binary_precision": 2,
-        "number_of_epochs": 10,
-        "number_of_variables": 8,
+        "number_of_epochs": 4,
+        "number_of_variables": 4,
         "selection_parameters": {
             "tournament_size": 2
         },
@@ -15,10 +15,10 @@
         },
         "crossover_probability": 1.0,
         "mutation_probability": 1.0,
-        "selection_method": "best",
-        "crossover_method": "blend_crossover_alpha",
+        "selection_method": "roulette_wheel",
+        "crossover_method": "arithmetic_crossover",
         "mutation_method": "gauss_mutation",
-        "maximization": true,
-        "fitness_function": "Bent Cigar"
+        "maximization": false,
+        "fitness_function": "Hypersphere"
     }
 }
